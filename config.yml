@@ -5,4 +5,4 @@ database:
   data_source: todos.db
 jwt:
   secret_key: 3692ec1a8401795d4d99480da41ce4384a4cb4e8ba2cb38227a9c65cbbabbc7c
-  token_expiry: 2
+  token_expiry: 5

@@ -17,7 +17,7 @@ func GenerateToken(user User, secretKey string, tokenExpiry time.Duration) (stri
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userName": user.GetUserName(),
 		"email":    user.GetEmail(),
-		"roles":    user.GetRole(),
+		"role":     user.GetRole(),
 		"nbf":      time.Now().Unix(),
 		"exp":      time.Now().Add(tokenExpiry).Unix(),
 	})

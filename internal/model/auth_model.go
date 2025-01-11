@@ -1,4 +1,4 @@
-package auth
+package model
 
 // Авторизация
 type UserSignInRequest struct {

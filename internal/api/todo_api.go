@@ -1,4 +1,4 @@
-package todo
+package api
 
 import (
 	"database/sql"

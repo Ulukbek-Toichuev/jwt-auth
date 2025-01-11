@@ -1,9 +1,11 @@
-package auth
+package api
 
 import (
 	"database/sql"
 	"fmt"
 	"jwt-auth/config"
+	"jwt-auth/internal/model"
+	"jwt-auth/internal/service"
 	"jwt-auth/pkg"
 	"net/http"
 	"time"
@@ -12,30 +14,30 @@ import (
 )
 
 type AuthHandler struct {
-	authService AuthService
+	userService service.UserService
 	secretKey   string
 	tokenExpiry time.Duration
 }
 
 func NewAuthHandler(db *sql.DB, cg *config.Config) *AuthHandler {
-	as := NewAuthService(db)
+	as := service.NewUserService(db)
 	return &AuthHandler{
-		authService: *as,
+		userService: *as,
 		secretKey:   cg.GetSecretKey(),
 		tokenExpiry: time.Duration(cg.GetTokenExpiry()) * time.Minute,
 	}
 }
 
 func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
-	var payload *UserSignInRequest
+	var payload *model.UserSignInRequest
 
-	payload, err := pkg.ParsePayloadWithValidator[UserSignInRequest](w, r)
+	payload, err := pkg.ParsePayloadWithValidator[model.UserSignInRequest](w, r)
 	if err != nil {
 		pkg.WriteResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	res, err := ah.authService.getUserByEmail(payload.Email)
+	res, err := ah.userService.GetUserByEmail(payload.Email)
 	if err != nil {
 		pkg.WriteResponse(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
@@ -56,15 +58,15 @@ func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
-	var payload *UserSignUpRequest
+	var payload *model.UserSignUpRequest
 
-	payload, err := pkg.ParsePayloadWithValidator[UserSignUpRequest](w, r)
+	payload, err := pkg.ParsePayloadWithValidator[model.UserSignUpRequest](w, r)
 	if err != nil {
 		pkg.WriteResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	id, err := ah.authService.createUser(*payload)
+	id, err := ah.userService.CreateUser(*payload)
 	if err != nil {
 		pkg.WriteResponse(w, http.StatusInternalServerError, err.Error())
 		return

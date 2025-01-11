@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"jwt-auth/config"
-	"jwt-auth/internal/auth"
+	"jwt-auth/internal/api"
 	"jwt-auth/internal/db"
-	"jwt-auth/internal/todo"
-	"jwt-auth/internal/user"
 	"jwt-auth/pkg"
 	"log"
 	"net/http"
@@ -21,9 +19,9 @@ func main() {
 	config := config.NewConfig()
 	db := db.NewDB(config.GetDriverName(), config.GetDataSource())
 
-	authHandler := auth.NewAuthHandler(db, config)
-	todoHandler := todo.NewTodoHandler(db)
-	userHandler := user.NewUserHandler()
+	authHandler := api.NewAuthHandler(db, config)
+	todoHandler := api.NewTodoHandler(db)
+	userHandler := api.NewUserHandler(db)
 	mux := http.NewServeMux()
 
 	{
