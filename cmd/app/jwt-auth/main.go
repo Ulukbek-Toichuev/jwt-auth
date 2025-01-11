@@ -7,6 +7,7 @@ import (
 	"jwt-auth/internal/auth"
 	"jwt-auth/internal/db"
 	"jwt-auth/internal/todo"
+	"jwt-auth/internal/user"
 	"jwt-auth/pkg"
 	"log"
 	"net/http"
@@ -22,12 +23,30 @@ func main() {
 
 	authHandler := auth.NewAuthHandler(db, config)
 	todoHandler := todo.NewTodoHandler(db)
+	userHandler := user.NewUserHandler()
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /api/sign-in", authHandler.SignIn)
-	mux.HandleFunc("POST /api/sign-up", authHandler.SignUp)
+	{
+		mux.HandleFunc("POST /api/sign-in", authHandler.SignIn)
+		mux.HandleFunc("POST /api/sign-up", authHandler.SignUp)
 
-	mux.Handle("GET /api/todos", pkg.AuthMiddleWare(http.HandlerFunc(todoHandler.GetAllByUser), config.Jwt.SecretKey))
+	}
+
+	{
+		mux.Handle("GET /api/admin/users", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.GetAllUsers), config.Jwt.SecretKey))
+		mux.Handle("GET /api/admin/users/{id}", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.GetUserById), config.Jwt.SecretKey))
+		mux.Handle("PUT /api/admin/users", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.ChangeUsersRole), config.Jwt.SecretKey))
+		mux.Handle("DELETE /api/admin/users", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.DeleteUserByEmail), config.Jwt.SecretKey))
+	}
+
+	{
+		mux.Handle("GET /api/users/{id}", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.GetUsersOwnDetail), config.Jwt.SecretKey))
+		mux.Handle("GET /api/users/todos", pkg.AuthMiddleWare(http.HandlerFunc(todoHandler.GetAllByUser), config.Jwt.SecretKey))
+		mux.Handle("GET /api/users/todos/{id}", pkg.AuthMiddleWare(http.HandlerFunc(todoHandler.GetTodoById), config.Jwt.SecretKey))
+		mux.Handle("POST /api/users/todos", pkg.AuthMiddleWare(http.HandlerFunc(todoHandler.CreateTodo), config.Jwt.SecretKey))
+		mux.Handle("PUT /api/users/todos/{id}", pkg.AuthMiddleWare(http.HandlerFunc(todoHandler.UpdateTodoStatus), config.Jwt.SecretKey))
+		mux.Handle("DELETE /api/users/todos/{id}", pkg.AuthMiddleWare(http.HandlerFunc(todoHandler.DeleteTodoById), config.Jwt.SecretKey))
+	}
 
 	completedHandler := pkg.CORSMiddleware(
 		pkg.LoggerMiddleware(mux),

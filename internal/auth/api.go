@@ -11,11 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	headerKey string = "Content-Type"
-	headerVal string = "application/json"
-)
-
 type AuthHandler struct {
 	authService AuthService
 	secretKey   string
@@ -33,7 +28,6 @@ func NewAuthHandler(db *sql.DB, cg *config.Config) *AuthHandler {
 
 func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	var payload *UserSignInRequest
-	w.Header().Set(headerKey, headerVal)
 
 	payload, err := pkg.ParsePayloadWithValidator[UserSignInRequest](w, r)
 	if err != nil {
@@ -63,7 +57,6 @@ func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var payload *UserSignUpRequest
-	w.Header().Set(headerKey, headerVal)
 
 	payload, err := pkg.ParsePayloadWithValidator[UserSignUpRequest](w, r)
 	if err != nil {

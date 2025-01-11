@@ -10,11 +10,14 @@ import (
 
 type ctxResult string
 
-const (
-	headerKey    string    = "Content-Type"
-	headerVal    string    = "application/json"
-	ResultCtxKey ctxResult = "parsed-token"
-)
+var corsHeaders = map[string]string{
+	"Access-Control-Allow-Origin":   "*",
+	"Access-Control-Allow-Headers":  "Accept, Authorization, Content-Type, Origin",
+	"Access-Control-Allow-Methods":  "GET, POST, PUT, DELETE, OPTIONS",
+	"Access-Control-Expose-Headers": "Content-Length, Content-Type",
+}
+
+const ResultCtxKey ctxResult = "parsed-token"
 
 func LoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,21 +33,18 @@ func AuthMiddleWare(next http.Handler, secretKey string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			w.Header().Set(headerKey, headerVal)
 			WriteResponse(w, http.StatusUnauthorized, "missing 'Authorization' header")
 			return
 		}
 
 		token := strings.Split(authHeader, " ")
 		if len(token) != 2 || token[0] != "Bearer" {
-			w.Header().Set(headerKey, headerVal)
 			WriteResponse(w, http.StatusUnauthorized, "uncorrect token format")
 			return
 		}
 
 		result, err := VerifyToken(token[1], secretKey)
 		if err != nil {
-			w.Header().Set(headerKey, headerVal)
 			WriteResponse(w, http.StatusUnauthorized, err.Error())
 			return
 		}
@@ -56,11 +56,9 @@ func AuthMiddleWare(next http.Handler, secretKey string) http.Handler {
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Content-Type")
-
+		for k, v := range corsHeaders {
+			w.Header().Set(k, v)
+		}
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
