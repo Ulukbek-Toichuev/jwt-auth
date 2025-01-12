@@ -33,28 +33,28 @@ func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	payload, err := pkg.ParsePayloadWithValidator[model.UserSignInRequest](w, r)
 	if err != nil {
-		pkg.WriteResponse(w, http.StatusBadRequest, err.Error())
+		pkg.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	res, err := ah.userService.GetUserByEmail(payload.Email)
+	res, err := ah.userService.GetUserByEmailWithPasswd(payload.Email)
 	if err != nil {
-		pkg.WriteResponse(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(payload.Password))
 	if err != nil {
-		pkg.WriteResponse(w, http.StatusInternalServerError, "incorrect password, please check your credential")
+		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, "incorrect password, please check your credential")
 		return
 	}
 
 	generatedToken, err := pkg.GenerateToken(&res, ah.secretKey, ah.tokenExpiry)
 	if err != nil {
-		pkg.WriteResponse(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
-	pkg.WriteResponse(w, http.StatusOK, generatedToken)
+	pkg.WriteResponseWithMssg(w, http.StatusOK, generatedToken)
 }
 
 func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -62,15 +62,15 @@ func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	payload, err := pkg.ParsePayloadWithValidator[model.UserSignUpRequest](w, r)
 	if err != nil {
-		pkg.WriteResponse(w, http.StatusBadRequest, err.Error())
+		pkg.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	id, err := ah.userService.CreateUser(*payload)
 	if err != nil {
-		pkg.WriteResponse(w, http.StatusInternalServerError, err.Error())
+		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, err.Error())
 		return
 
 	}
-	pkg.WriteResponse(w, http.StatusCreated, fmt.Sprintf("successfully create user with id %d", id))
+	pkg.WriteResponseWithMssg(w, http.StatusCreated, fmt.Sprintf("successfully create user with id %d", id))
 }

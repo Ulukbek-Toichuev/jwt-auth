@@ -33,19 +33,19 @@ func AuthMiddleWare(next http.Handler, secretKey string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			WriteResponse(w, http.StatusUnauthorized, "missing 'Authorization' header")
+			WriteResponseWithMssg(w, http.StatusUnauthorized, "missing 'Authorization' header")
 			return
 		}
 
 		token := strings.Split(authHeader, " ")
 		if len(token) != 2 || token[0] != "Bearer" {
-			WriteResponse(w, http.StatusUnauthorized, "uncorrect token format")
+			WriteResponseWithMssg(w, http.StatusUnauthorized, "uncorrect token format")
 			return
 		}
 
 		result, err := VerifyToken(token[1], secretKey)
 		if err != nil {
-			WriteResponse(w, http.StatusUnauthorized, err.Error())
+			WriteResponseWithMssg(w, http.StatusUnauthorized, err.Error())
 			return
 		}
 		ctx := context.WithValue(r.Context(), ResultCtxKey, result)

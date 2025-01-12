@@ -1,0 +1,15 @@
+meta {
+  name: get-user-by-email
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8080/api/admin/users/test01@mail.com
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMkBtYWlsLmNvbSIsImV4cCI6MTczNjY5MDg2OCwibmJmIjoxNzM2NjkwNTY4LCJyb2xlIjoiQURNSU4iLCJ1c2VyTmFtZSI6InRlc3QwMiJ9.KX7J70j1q1BObJvtJM6eVvVxXogNdLXPxUXtA1DrOks
+}

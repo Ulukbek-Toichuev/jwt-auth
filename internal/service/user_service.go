@@ -14,7 +14,8 @@ type User interface {
 	CreateUser(user entity.UserEntity) (int, error)
 	GetUserByEmail(email string) (entity.UserEntity, error)
 	GetUsers() ([]entity.UserEntity, error)
-	DeleteUser(id int)
+	ChangeUsersRole(role, email string) (int, error)
+	DeleteUser(email string) (int, error)
 }
 
 type UserService struct {
@@ -42,12 +43,33 @@ func (us *UserService) CreateUser(user model.UserSignUpRequest) (int, error) {
 	return id, nil
 }
 
-func (us *UserService) GetUserByEmail(email string) (entity.UserEntity, error) {
+func (us *UserService) GetUserByEmail(email string) (model.UserResponse, error) {
 	user, err := us.userStore.GetUserByEmail(email)
 	if err != nil {
-		return entity.UserEntity{}, err
+		return model.UserResponse{}, err
 	}
-	return user, nil
+	return *model.NewUserResponse(
+		user.UserId,
+		user.Username,
+		user.Role,
+		user.Email,
+		user.CreatedDate,
+	), nil
+}
+
+func (us *UserService) GetUserByEmailWithPasswd(email string) (model.UserAuthResponse, error) {
+	user, err := us.userStore.GetUserByEmail(email)
+	if err != nil {
+		return model.UserAuthResponse{}, err
+	}
+	return *model.NewUserAuthResponse(
+		user.UserId,
+		user.Username,
+		user.Role,
+		user.Email,
+		user.Password,
+		user.CreatedDate,
+	), nil
 }
 
 func (us *UserService) GetUsers() ([]model.UserResponse, error) {
@@ -67,4 +89,22 @@ func (us *UserService) GetUsers() ([]model.UserResponse, error) {
 		)
 	}
 	return result, nil
+}
+
+func (us *UserService) ChangeUsersRole(user model.UserChangeRoleRequest) (int, error) {
+	res, err := us.userStore.ChangeUsersRole(user.Role, user.Email)
+	if err != nil {
+		return 0, err
+	}
+
+	return res, nil
+}
+
+func (us *UserService) DeleteUser(user model.UserDeleteRequest) (int, error) {
+	res, err := us.userStore.DeleteUser(user.Email)
+	if err != nil {
+		return 0, err
+	}
+
+	return res, nil
 }

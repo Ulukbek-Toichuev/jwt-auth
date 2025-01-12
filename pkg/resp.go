@@ -10,14 +10,14 @@ const (
 	headerVal string = "application/json"
 )
 
-func WriteResponse(w http.ResponseWriter, statusCode int, message string) {
+func WriteResponseWithMssg(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set(headerKey, headerVal)
 	w.WriteHeader(statusCode)
 	response := NewGeneralMessageResponse(message)
 	json.NewEncoder(w).Encode(response)
 }
 
-func WriteResponseWithoutMssg(w http.ResponseWriter, statusCode int, message any) {
+func WriteResponse(w http.ResponseWriter, statusCode int, message any) {
 	w.Header().Set(headerKey, headerVal)
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(message)

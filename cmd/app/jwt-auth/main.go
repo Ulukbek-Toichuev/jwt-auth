@@ -32,7 +32,7 @@ func main() {
 
 	{
 		mux.Handle("GET /api/admin/users", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.GetAllUsers), config.Jwt.SecretKey))
-		mux.Handle("GET /api/admin/users/{id}", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.GetUserById), config.Jwt.SecretKey))
+		mux.Handle("GET /api/admin/users/{email}", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.GetUserByEmail), config.Jwt.SecretKey))
 		mux.Handle("PUT /api/admin/users", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.ChangeUsersRole), config.Jwt.SecretKey))
 		mux.Handle("DELETE /api/admin/users", pkg.AuthMiddleWare(http.HandlerFunc(userHandler.DeleteUserByEmail), config.Jwt.SecretKey))
 	}
