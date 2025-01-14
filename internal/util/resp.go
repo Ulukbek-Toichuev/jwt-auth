@@ -1,7 +1,8 @@
-package pkg
+package util
 
 import (
 	"encoding/json"
+	"jwt-auth/internal/model"
 	"net/http"
 )
 
@@ -13,7 +14,7 @@ const (
 func WriteResponseWithMssg(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set(headerKey, headerVal)
 	w.WriteHeader(statusCode)
-	response := NewGeneralMessageResponse(message)
+	response := model.NewGeneralMessageResponse(message)
 	json.NewEncoder(w).Encode(response)
 }
 

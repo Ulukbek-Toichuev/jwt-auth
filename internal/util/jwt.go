@@ -1,4 +1,4 @@
-package auth
+package util
 
 import (
 	"jwt-auth/internal/model"
@@ -8,7 +8,6 @@ import (
 )
 
 func GenerateToken(user *model.UserAuthResponse, secretKey string, tokenExpiry time.Duration) (string, error) {
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userName": user.Username,
 		"email":    user.Email,

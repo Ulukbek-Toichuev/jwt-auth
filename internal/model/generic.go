@@ -1,4 +1,4 @@
-package pkg
+package model
 
 type GeneralMessageResponse struct {
 	Message string `json:"message"`

@@ -2,8 +2,7 @@ package middleware
 
 import (
 	"context"
-	"jwt-auth/internal/auth"
-	"jwt-auth/pkg"
+	"jwt-auth/internal/util"
 	"log"
 	"net/http"
 	"strings"
@@ -47,19 +46,19 @@ func (mw *MiddleWare) AuthMiddleWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			pkg.WriteResponseWithMssg(w, http.StatusUnauthorized, "missing 'Authorization' header")
+			util.WriteResponseWithMssg(w, http.StatusUnauthorized, "missing 'Authorization' header")
 			return
 		}
 
 		token := strings.Split(authHeader, " ")
 		if len(token) != 2 || token[0] != "Bearer" {
-			pkg.WriteResponseWithMssg(w, http.StatusUnauthorized, "uncorrect token format")
+			util.WriteResponseWithMssg(w, http.StatusUnauthorized, "uncorrect token format")
 			return
 		}
 
-		result, err := auth.VerifyToken(token[1], mw.secretKey)
+		result, err := util.VerifyToken(token[1], mw.secretKey)
 		if err != nil {
-			pkg.WriteResponseWithMssg(w, http.StatusUnauthorized, err.Error())
+			util.WriteResponseWithMssg(w, http.StatusUnauthorized, err.Error())
 			return
 		}
 		ctx := context.WithValue(r.Context(), ResultCtxKey, result)

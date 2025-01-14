@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"jwt-auth/internal/middleware"
-	"jwt-auth/pkg"
+	"jwt-auth/internal/model"
 	"net/http"
 )
 
@@ -25,7 +25,7 @@ func (th *TodoHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		currUserEmail = value.(string)
 	}
-	response := pkg.NewGeneralMessageResponse(fmt.Sprintf("current user email - %s", currUserEmail))
+	response := model.NewGeneralMessageResponse(fmt.Sprintf("current user email - %s", currUserEmail))
 	json.NewEncoder(w).Encode(response)
 }
 

@@ -6,7 +6,7 @@ import (
 	"jwt-auth/internal/middleware"
 	"jwt-auth/internal/model"
 	"jwt-auth/internal/service"
-	"jwt-auth/pkg"
+	"jwt-auth/internal/util"
 	"net/http"
 )
 
@@ -23,11 +23,11 @@ func (uh *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	uh.verifyUserFromCTX(w, r)
 	users, err := uh.userService.GetUsers()
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
-	pkg.WriteResponse(w, http.StatusOK, users)
+	util.WriteResponse(w, http.StatusOK, users)
 }
 
 func (uh *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
@@ -35,11 +35,11 @@ func (uh *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	uh.verifyUserFromCTX(w, r)
 	user, err := uh.userService.GetUserByEmail(email)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
-	pkg.WriteResponse(w, http.StatusOK, user)
+	util.WriteResponse(w, http.StatusOK, user)
 }
 
 func (uh *UserHandler) GetUsersOwnDetail(w http.ResponseWriter, r *http.Request) {
@@ -54,10 +54,10 @@ func (uh *UserHandler) GetUsersOwnDetail(w http.ResponseWriter, r *http.Request)
 
 	res, err := uh.userService.GetUserByEmail(currUserEmail)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
-	pkg.WriteResponse(w, http.StatusOK, res)
+	util.WriteResponse(w, http.StatusOK, res)
 }
 
 func (uh *UserHandler) ChangeUsersRole(w http.ResponseWriter, r *http.Request) {
@@ -65,19 +65,19 @@ func (uh *UserHandler) ChangeUsersRole(w http.ResponseWriter, r *http.Request) {
 
 	var payload *model.UserChangeRoleRequest
 
-	payload, err := pkg.ParsePayloadWithValidator[model.UserChangeRoleRequest](w, r)
+	payload, err := util.ParsePayloadWithValidator[model.UserChangeRoleRequest](w, r)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
+		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	updatedRowsCount, err := uh.userService.ChangeUsersRole(*payload)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
-	pkg.WriteResponseWithMssg(w, http.StatusOK, fmt.Sprintf("updated rows count in db: %d", updatedRowsCount))
+	util.WriteResponseWithMssg(w, http.StatusOK, fmt.Sprintf("updated rows count in db: %d", updatedRowsCount))
 }
 
 func (uh *UserHandler) DeleteUserByEmail(w http.ResponseWriter, r *http.Request) {
@@ -85,19 +85,19 @@ func (uh *UserHandler) DeleteUserByEmail(w http.ResponseWriter, r *http.Request)
 
 	var payload *model.UserDeleteRequest
 
-	payload, err := pkg.ParsePayloadWithValidator[model.UserDeleteRequest](w, r)
+	payload, err := util.ParsePayloadWithValidator[model.UserDeleteRequest](w, r)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
+		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	updatedRowsCount, err := uh.userService.DeleteUser(*payload)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
-	pkg.WriteResponseWithMssg(w, http.StatusOK, fmt.Sprintf("updated rows count in db: %d", updatedRowsCount))
+	util.WriteResponseWithMssg(w, http.StatusOK, fmt.Sprintf("updated rows count in db: %d", updatedRowsCount))
 }
 
 func (uh *UserHandler) verifyUserFromCTX(w http.ResponseWriter, r *http.Request) {
@@ -112,12 +112,12 @@ func (uh *UserHandler) verifyUserFromCTX(w http.ResponseWriter, r *http.Request)
 
 	res, err := uh.userService.GetUserByEmail(currUserEmail)
 	if err != nil {
-		pkg.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
 	if res.Role != "ADMIN" {
-		pkg.WriteResponseWithMssg(w, http.StatusForbidden, "only for user with admin role")
+		util.WriteResponseWithMssg(w, http.StatusForbidden, "only for user with admin role")
 		return
 	}
 }
