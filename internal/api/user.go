@@ -20,7 +20,10 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 }
 
 func (uh *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	uh.verifyUserFromCTX(w, r)
+	isHavePermission := uh.verifyUserFromCTX(w, r)
+	if !isHavePermission {
+		return
+	}
 	users, err := uh.userService.GetUsers()
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
@@ -100,12 +103,12 @@ func (uh *UserHandler) DeleteUserByEmail(w http.ResponseWriter, r *http.Request)
 	util.WriteResponseWithMssg(w, http.StatusOK, fmt.Sprintf("updated rows count in db: %d", updatedRowsCount))
 }
 
-func (uh *UserHandler) verifyUserFromCTX(w http.ResponseWriter, r *http.Request) {
+func (uh *UserHandler) verifyUserFromCTX(w http.ResponseWriter, r *http.Request) bool {
 	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
 
 	currUserEmail := ""
 	if value, ok := result["email"]; !ok {
-		return
+		return false
 	} else {
 		currUserEmail = value.(string)
 	}
@@ -113,11 +116,12 @@ func (uh *UserHandler) verifyUserFromCTX(w http.ResponseWriter, r *http.Request)
 	res, err := uh.userService.GetUserByEmail(currUserEmail)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
-		return
+		return false
 	}
 
 	if res.Role != "ADMIN" {
 		util.WriteResponseWithMssg(w, http.StatusForbidden, "only for user with admin role")
-		return
+		return false
 	}
+	return true
 }
