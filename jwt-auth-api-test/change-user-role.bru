@@ -1,0 +1,22 @@
+meta {
+  name: change-user-role
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8080/api/admin/users
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMkBtYWlsLmNvbSIsImV4cCI6MTczNjY5MTA3NSwibmJmIjoxNzM2NjkwNzc1LCJyb2xlIjoiQURNSU4iLCJ1c2VyTmFtZSI6InRlc3QwMiJ9.wAhfVRcQSAmJuDSm_rlIXOXlfnlI6w-rFt5uB2Wo1Y4
+}
+
+body:json {
+  {
+    "email": "test01@mail.com",
+    "role": "USER"
+  }
+}

@@ -1,0 +1,18 @@
+meta {
+  name: sign-in
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/sign-in
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "test02@mail.com",
+    "password": "test02_passwd"
+  }
+}

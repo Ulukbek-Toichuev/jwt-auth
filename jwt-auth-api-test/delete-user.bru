@@ -1,0 +1,21 @@
+meta {
+  name: delete-user
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:8080/api/admin/users
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMkBtYWlsLmNvbSIsImV4cCI6MTczNjY5MTI3MywibmJmIjoxNzM2NjkwOTczLCJyb2xlIjoiQURNSU4iLCJ1c2VyTmFtZSI6InRlc3QwMiJ9.Oe0zTb0FVh5VkKX_gOWf5utc3xCAbE5VSy2VUSPQODQ
+}
+
+body:json {
+  {
+    "email": "test01@mail.com"
+  }
+}
