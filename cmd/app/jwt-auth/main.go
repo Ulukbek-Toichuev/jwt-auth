@@ -17,7 +17,7 @@ import (
 func main() {
 	config := config.NewConfig()
 
-	db := db.NewDB(config.GetDriverName(), config.GetDataSource())
+	db := db.NewDB(config.GetDriverName(), config.GetDataSource(), config.GetMigrationsPath())
 
 	authHandler := api.NewAuthHandler(db, config)
 	userHandler := api.NewUserHandler(db)

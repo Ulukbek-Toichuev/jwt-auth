@@ -12,7 +12,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func NewDB(driverName, dataSourceName string) *sql.DB {
+func NewDB(driverName, dataSourceName, migrationsPath string) *sql.DB {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		log.Printf("%v", err)
@@ -20,7 +20,7 @@ func NewDB(driverName, dataSourceName string) *sql.DB {
 	}
 
 	m, err := migrate.New(
-		"file:///Users/ulukbek_toichuev/Documents/jwt-auth/internal/db/migrations",
+		"file://"+migrationsPath,
 		"sqlite3://"+dataSourceName,
 	)
 
