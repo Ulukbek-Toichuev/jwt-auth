@@ -3,6 +3,8 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
@@ -48,7 +50,7 @@ func NewConfig() *Config {
 		os.Exit(1)
 	}
 	config.Database.MigrationsPath = getPath(config.Database.EnvName)
-	config.Jwt.SecretKey = getPath("SECRET_KEY")
+	config.Jwt.SecretKey = os.Getenv("SECRET_KEY")
 	return &config
 }
 
@@ -83,5 +85,9 @@ func getPath(envName string) string {
 		os.Exit(1)
 	}
 
+	if runtime.GOOS == "windows" {
+		path = filepath.ToSlash(path)
+		return path
+	}
 	return path
 }
