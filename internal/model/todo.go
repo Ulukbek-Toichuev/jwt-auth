@@ -6,8 +6,8 @@ import (
 
 type TodoCreateRequest struct {
 	UserId      int
-	Title       string
-	Description string
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description" validate:"required"`
 }
 
 func NewTodoCreateRequest() *TodoCreateRequest {

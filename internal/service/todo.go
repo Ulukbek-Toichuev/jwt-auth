@@ -1,12 +1,15 @@
 package service
 
 import (
+	"database/sql"
+	store "jwt-auth/internal/db"
 	"jwt-auth/internal/entity"
 	"jwt-auth/internal/model"
+	"time"
 )
 
 type Todo interface {
-	CreateTodo(model.TodoCreateRequest) (int, error)
+	CreateTodo(entity.TodoEntity) (int, error)
 	GetAll() ([]entity.TodoEntity, error)
 	GetById(id int) (entity.TodoEntity, error)
 	UpdateStatus(id int, status string) (int, error)
@@ -17,13 +20,22 @@ type TodoService struct {
 	todoStore Todo
 }
 
-// func NewTodoService(db *sql.DB) *TodoService {
-// 	todoStore := store.NewTodoStore(db)
-// 	return &TodoService{todoStore}
-// }
+func NewTodoService(db *sql.DB) *TodoService {
+	todoStore := store.NewTodoStore(db)
+	return &TodoService{todoStore}
+}
 
 func (ts *TodoService) CreateTodo(model model.TodoCreateRequest) (int, error) {
-	result, err := ts.todoStore.CreateTodo(model)
+	entity := entity.TodoEntity{
+		Id:          0,
+		UserId:      model.UserId,
+		Title:       model.Title,
+		Description: model.Description,
+		Status:      entity.CREATED,
+		CreatedDate: time.Now(),
+		DeletedDate: sql.NullTime{},
+	}
+	result, err := ts.todoStore.CreateTodo(entity)
 	if err != nil {
 		return 0, err
 	}

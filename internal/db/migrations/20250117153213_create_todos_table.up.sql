@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS todos (
     user_id INTEGER,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
-    is_done BOOLEAN,
+    status TEXT,
     created_date DATETIME NOT NULL,
     deleted_date DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE

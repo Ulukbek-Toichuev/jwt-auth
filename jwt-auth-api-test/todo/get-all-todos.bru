@@ -1,0 +1,15 @@
+meta {
+  name: get-all-todos
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/api/users/todos
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMUBtYWlsLmNvbSIsImV4cCI6MTczNzE0ODM0NiwibmJmIjoxNzM3MTQ4MDQ2LCJyb2xlIjoiQURNSU4iLCJ1c2VyTmFtZSI6InRlc3QwMSJ9.lzsAzTKJ-yYSE08QUV-1valu-ddl-qHmLrUoNGBCNhA
+}

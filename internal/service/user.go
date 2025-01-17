@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	store "jwt-auth/internal/db"
 	entity "jwt-auth/internal/entity"
+	"jwt-auth/internal/middleware"
 	model "jwt-auth/internal/model"
+	"net/http"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -107,4 +109,25 @@ func (us *UserService) DeleteUser(user model.UserDeleteRequest) (int, error) {
 	}
 
 	return res, nil
+}
+
+func (us *UserService) VerifyUserFromCTX(w http.ResponseWriter, r *http.Request) bool {
+	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
+
+	currUserEmail := ""
+	if value, ok := result["email"]; !ok {
+		return false
+	} else {
+		currUserEmail = value.(string)
+	}
+
+	res, err := us.GetUserByEmail(currUserEmail)
+	if err != nil {
+		return false
+	}
+
+	if res.Role != "ADMIN" {
+		return false
+	}
+	return true
 }

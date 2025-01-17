@@ -1,0 +1,22 @@
+meta {
+  name: create-todo
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/api/users/todos
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMUBtYWlsLmNvbSIsImV4cCI6MTczNzE0NjY3OCwibmJmIjoxNzM3MTQ2Mzc4LCJyb2xlIjoiVVNFUiIsInVzZXJOYW1lIjoidGVzdDAxIn0.5y9Eswn4wRmjUSaCpmBKAVAmROTiIbypiQHMKSBfltM
+}
+
+body:json {
+  {
+    "title": "First task",
+    "Description": "First tasks description"
+  }
+}
