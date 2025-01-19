@@ -28,7 +28,7 @@ func (th *TodoHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 	res, err := th.getUserByEmailFromCTX(r)
 	if err != nil {
 		var errCustom util.ErrorCustom
-		if errors.As(err, errCustom) {
+		if errors.As(err, &errCustom) {
 			util.WriteResponseWithMssg(w, errCustom.Code, errCustom.Message)
 		}
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
@@ -46,7 +46,7 @@ func (th *TodoHandler) GetAllByStatus(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (th *TodoHandler) GetTodoByIdAndByUser(w http.ResponseWriter, r *http.Request) {
+func (th *TodoHandler) GetTodoByIdAndUserId(w http.ResponseWriter, r *http.Request) {
 	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
 
 	currUserEmail := ""
@@ -70,7 +70,7 @@ func (th *TodoHandler) GetTodoByIdAndByUser(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	todo, err := th.todoService.GetById(todoIdInt)
+	todo, err := th.todoService.GetByIdAndByUserId(todoIdInt, res.UserId)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -83,7 +83,7 @@ func (th *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 	res, err := th.getUserByEmailFromCTX(r)
 	if err != nil {
 		var errCustom util.ErrorCustom
-		if errors.As(err, errCustom) {
+		if errors.As(err, &errCustom) {
 			util.WriteResponseWithMssg(w, errCustom.Code, errCustom.Message)
 		}
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
@@ -105,10 +105,14 @@ func (th *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (th *TodoHandler) UpdateTodoStatus(w http.ResponseWriter, r *http.Request) {
-	isHavePermission := th.userService.VerifyUserFromCTX(w, r)
-	if !isHavePermission {
-		util.WriteResponseWithMssg(w, http.StatusForbidden, "the user does not meet role requirements")
-		return
+	res, err := th.getUserByEmailFromCTX(r)
+	if err != nil {
+		var errCustom util.ErrorCustom
+		if errors.As(err, &errCustom) {
+			util.WriteResponseWithMssg(w, errCustom.Code, errCustom.Message)
+			return
+		}
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 	}
 
 	todoId := r.PathValue("id")
@@ -125,7 +129,7 @@ func (th *TodoHandler) UpdateTodoStatus(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	updatedRowsCount, err := th.todoService.UpdateStatus(todoIdInt, entity.Todo_status(payload.Status))
+	updatedRowsCount, err := th.todoService.UpdateStatus(todoIdInt, res.UserId, entity.Todo_status(payload.Status))
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
@@ -135,7 +139,29 @@ func (th *TodoHandler) UpdateTodoStatus(w http.ResponseWriter, r *http.Request) 
 }
 
 func (th *TodoHandler) DeleteTodoById(w http.ResponseWriter, r *http.Request) {
+	res, err := th.getUserByEmailFromCTX(r)
+	if err != nil {
+		var errCustom util.ErrorCustom
+		if errors.As(err, &errCustom) {
+			util.WriteResponseWithMssg(w, errCustom.Code, errCustom.Message)
+			return
+		}
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+	}
 
+	todoId := r.PathValue("id")
+	todoIdInt, err := strconv.Atoi(todoId)
+	if err != nil {
+		util.WriteResponseWithMssg(w, http.StatusBadRequest, "todos id must be digit")
+		return
+	}
+	updatedRowsCount, err := th.todoService.DeleteById(todoIdInt, res.UserId)
+	if err != nil {
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		return
+	}
+
+	util.WriteResponseWithMssg(w, http.StatusOK, fmt.Sprintf("todo succesfully delete: %d", updatedRowsCount))
 }
 
 func (th *TodoHandler) getUserByEmailFromCTX(r *http.Request) (model.UserResponse, error) {

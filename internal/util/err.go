@@ -7,6 +7,6 @@ type ErrorCustom struct {
 	Message string
 }
 
-func (e *ErrorCustom) Error() string {
+func (e ErrorCustom) Error() string {
 	return fmt.Sprintf("Code: %d, Message: %s", e.Code, e.Message)
 }

@@ -13,8 +13,9 @@ type Todo interface {
 	GetAll() ([]entity.TodoEntity, error)
 	GetAllByUserId(userId int) ([]entity.TodoEntity, error)
 	GetById(id int) (entity.TodoEntity, error)
-	UpdateStatus(id int, status entity.Todo_status) (int, error)
-	DeleteById(id int) (int, error)
+	GetByIdAndByUserId(id, userId int) (entity.TodoEntity, error)
+	UpdateStatus(id, userId int, status entity.Todo_status) (int, error)
+	DeleteById(id, userId int) (int, error)
 }
 
 type TodoService struct {
@@ -89,8 +90,26 @@ func (ts *TodoService) GetById(id int) (model.TodoModelResponse, error) {
 	return result, nil
 }
 
-func (ts *TodoService) UpdateStatus(id int, status entity.Todo_status) (int, error) {
-	res, err := ts.todoStore.UpdateStatus(id, status)
+func (ts *TodoService) GetByIdAndByUserId(id, userId int) (model.TodoModelResponse, error) {
+	tmp, err := ts.todoStore.GetByIdAndByUserId(id, userId)
+	if err != nil {
+		return model.TodoModelResponse{}, err
+	}
+
+	result := model.TodoModelResponse{
+		Id:          tmp.Id,
+		UserId:      tmp.UserId,
+		Title:       tmp.Title,
+		Description: tmp.Description,
+		Status:      string(tmp.Status),
+		CreatedDate: tmp.CreatedDate,
+	}
+
+	return result, nil
+}
+
+func (ts *TodoService) UpdateStatus(id, userId int, status entity.Todo_status) (int, error) {
+	res, err := ts.todoStore.UpdateStatus(id, userId, status)
 	if err != nil {
 		return 0, err
 	}
@@ -98,8 +117,8 @@ func (ts *TodoService) UpdateStatus(id int, status entity.Todo_status) (int, err
 	return res, nil
 }
 
-func (ts *TodoService) DeleteById(id int) (int, error) {
-	res, err := ts.todoStore.DeleteById(id)
+func (ts *TodoService) DeleteById(id, userId int) (int, error) {
+	res, err := ts.todoStore.DeleteById(id, userId)
 	if err != nil {
 		return 0, err
 	}

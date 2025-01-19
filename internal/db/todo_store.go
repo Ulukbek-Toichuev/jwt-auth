@@ -11,8 +11,8 @@ import (
 const (
 	select_todo_query        = `SELECT todo_id, user_id, title, description, status, created_date, deleted_date FROM todos`
 	insert_todo_query        = `INSERT INTO todos (user_id, title, description, status, created_date, deleted_date) VALUES(?, ?, ?, ?, ?, NULL);`
-	update_todo_status_query = `UPDATE todos SET status = ? WHERE todo_id = ?;`
-	delete_todo_query        = `UPDATE todos SET deleted_date = ? WHERE todo_id = ?;`
+	update_todo_status_query = `UPDATE todos SET status = ? WHERE todo_id = ? AND user_id = ?;`
+	delete_todo_query        = `UPDATE todos SET deleted_date = ? WHERE todo_id = ? AND user_id = ?;`
 )
 
 type TodoStore struct {
@@ -94,8 +94,22 @@ func (ts *TodoStore) GetById(id int) (entity.TodoEntity, error) {
 	return todo, nil
 }
 
-func (ts *TodoStore) UpdateStatus(id int, status entity.Todo_status) (int, error) {
-	res, err := ts.db.Exec(update_todo_status_query, status, id)
+func (ts *TodoStore) GetByIdAndByUserId(id, userId int) (entity.TodoEntity, error) {
+	var todo entity.TodoEntity
+	preparedCondition := fmt.Sprintf("%s %s", select_todo_query, " WHERE todo_id = ? AND user_id = ? AND deleted_date IS NULL;")
+
+	row := ts.db.QueryRow(preparedCondition, id)
+	var status string
+	err := row.Scan(&todo.Id, &todo.UserId, &todo.Title, &todo.Description, &status, &todo.CreatedDate, &todo.DeletedDate)
+	if err != nil {
+		return todo, err
+	}
+	todo.Status = mapStatus(status)
+	return todo, nil
+}
+
+func (ts *TodoStore) UpdateStatus(id, userId int, status entity.Todo_status) (int, error) {
+	res, err := ts.db.Exec(update_todo_status_query, status, id, userId)
 	if err != nil {
 		return 0, err
 	}
@@ -108,8 +122,8 @@ func (ts *TodoStore) UpdateStatus(id int, status entity.Todo_status) (int, error
 	return int(count), nil
 }
 
-func (ts *TodoStore) DeleteById(id int) (int, error) {
-	res, err := ts.db.Exec(update_todo_status_query, time.Now(), id)
+func (ts *TodoStore) DeleteById(id, userId int) (int, error) {
+	res, err := ts.db.Exec(delete_todo_query, time.Now(), id, userId)
 	if err != nil {
 		return 0, err
 	}

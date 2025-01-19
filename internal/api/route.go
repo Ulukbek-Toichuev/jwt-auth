@@ -28,7 +28,7 @@ func (r *Route) SetUserRoute(mux *http.ServeMux, userHandler *UserHandler) {
 
 func (r *Route) SetTodoRoute(mux *http.ServeMux, todoHandler *TodoHandler) {
 	mux.Handle("GET /api/users/todos", r.mdlw.AuthMiddleWare(http.HandlerFunc(todoHandler.GetAllByUser)))
-	mux.Handle("GET /api/users/todos/{id}", r.mdlw.AuthMiddleWare(http.HandlerFunc(todoHandler.GetTodoByIdAndByUser)))
+	mux.Handle("GET /api/users/todos/{id}", r.mdlw.AuthMiddleWare(http.HandlerFunc(todoHandler.GetTodoByIdAndUserId)))
 	mux.Handle("POST /api/users/todos", r.mdlw.AuthMiddleWare(http.HandlerFunc(todoHandler.CreateTodo)))
 	mux.Handle("PUT /api/users/todos/{id}", r.mdlw.AuthMiddleWare(http.HandlerFunc(todoHandler.UpdateTodoStatus)))
 	mux.Handle("DELETE /api/users/todos/{id}", r.mdlw.AuthMiddleWare(http.HandlerFunc(todoHandler.DeleteTodoById)))
