@@ -53,7 +53,7 @@ func (us *UserService) GetUserByEmail(email string) (model.UserResponse, error) 
 	return *model.NewUserResponse(
 		user.UserId,
 		user.Username,
-		user.Role,
+		string(user.Role),
 		user.Email,
 		user.CreatedDate,
 	), nil
@@ -67,7 +67,7 @@ func (us *UserService) GetUserByEmailWithPasswd(email string) (model.UserAuthRes
 	return *model.NewUserAuthResponse(
 		user.UserId,
 		user.Username,
-		user.Role,
+		string(user.Role),
 		user.Email,
 		user.Password,
 		user.CreatedDate,
@@ -85,7 +85,7 @@ func (us *UserService) GetUsers() ([]model.UserResponse, error) {
 		result[i] = *model.NewUserResponse(
 			v.UserId,
 			v.Username,
-			v.Role,
+			string(v.Role),
 			v.Email,
 			v.CreatedDate,
 		)
@@ -111,9 +111,13 @@ func (us *UserService) DeleteUser(user model.UserDeleteRequest) (int, error) {
 	return res, nil
 }
 
-func (us *UserService) VerifyUserFromCTX(w http.ResponseWriter, r *http.Request) bool {
+// Получение данных текущего пользователя из контекста
+// Верификация пользователя на наличие указанной роли
+func (us *UserService) VerifyIsUserHavePermissionFromCTX(w http.ResponseWriter, r *http.Request, role entity.Role) bool {
+	//Получение данных пользователя из контекста
 	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
 
+	//Проверка на наличие email пользователя
 	currUserEmail := ""
 	if value, ok := result["email"]; !ok {
 		return false
@@ -121,12 +125,14 @@ func (us *UserService) VerifyUserFromCTX(w http.ResponseWriter, r *http.Request)
 		currUserEmail = value.(string)
 	}
 
+	//Запрос на получение пользователя по email
 	res, err := us.GetUserByEmail(currUserEmail)
 	if err != nil {
 		return false
 	}
 
-	if res.Role != "ADMIN" {
+	//Проверка ролей
+	if res.Role != string(role) {
 		return false
 	}
 	return true

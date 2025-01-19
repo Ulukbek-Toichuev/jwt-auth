@@ -94,7 +94,7 @@ func (ts *TodoStore) GetById(id int) (entity.TodoEntity, error) {
 	return todo, nil
 }
 
-func (ts *TodoStore) UpdateStatus(id int, status entity.TodoStatus) (int, error) {
+func (ts *TodoStore) UpdateStatus(id int, status entity.Todo_status) (int, error) {
 	res, err := ts.db.Exec(update_todo_status_query, status, id)
 	if err != nil {
 		return 0, err
@@ -122,7 +122,7 @@ func (ts *TodoStore) DeleteById(id int) (int, error) {
 	return int(count), nil
 }
 
-func mapStatus(status string) entity.TodoStatus {
+func mapStatus(status string) entity.Todo_status {
 	switch status {
 	case string(entity.CREATED):
 		return entity.CREATED

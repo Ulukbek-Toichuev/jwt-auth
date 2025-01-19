@@ -5,15 +5,17 @@ import (
 	"time"
 )
 
+type Role string
+
 const (
-	ADMIN string = "ADMIN"
-	USER  string = "USER"
+	ADMIN Role = "ADMIN"
+	USER  Role = "USER"
 )
 
 type UserEntity struct {
 	UserId      int
 	Username    string
-	Role        string
+	Role        Role
 	Email       string
 	Password    string
 	CreatedDate time.Time
@@ -36,7 +38,7 @@ func (u *UserEntity) GetUserName() string {
 	return u.Username
 }
 
-func (u *UserEntity) GetRole() string {
+func (u *UserEntity) GetRole() Role {
 	return u.Role
 }
 

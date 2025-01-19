@@ -13,7 +13,7 @@ type Todo interface {
 	GetAll() ([]entity.TodoEntity, error)
 	GetAllByUserId(userId int) ([]entity.TodoEntity, error)
 	GetById(id int) (entity.TodoEntity, error)
-	UpdateStatus(id int, status entity.TodoStatus) (int, error)
+	UpdateStatus(id int, status entity.Todo_status) (int, error)
 	DeleteById(id int) (int, error)
 }
 
@@ -89,7 +89,7 @@ func (ts *TodoService) GetById(id int) (model.TodoModelResponse, error) {
 	return result, nil
 }
 
-func (ts *TodoService) UpdateStatus(id int, status entity.TodoStatus) (int, error) {
+func (ts *TodoService) UpdateStatus(id int, status entity.Todo_status) (int, error) {
 	res, err := ts.todoStore.UpdateStatus(id, status)
 	if err != nil {
 		return 0, err

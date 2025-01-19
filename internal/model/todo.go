@@ -14,7 +14,7 @@ func NewTodoCreateRequest() *TodoCreateRequest {
 	return &TodoCreateRequest{}
 }
 
-type TodoStatusRequest struct {
+type Todo_statusRequest struct {
 	Status string `json:"status" validate:"required"`
 }
 

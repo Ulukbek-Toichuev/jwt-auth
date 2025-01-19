@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-type TodoStatus string
+type Todo_status string
 
 const (
-	CREATED     TodoStatus = "CREATED"
-	PENDING     TodoStatus = "PENDING"
-	IN_PROGRESS TodoStatus = "IN_PROGRESS"
-	DONE        TodoStatus = "DONE"
-	CANCELED    TodoStatus = "CANCELED"
+	CREATED     Todo_status = "CREATED"
+	PENDING     Todo_status = "PENDING"
+	IN_PROGRESS Todo_status = "IN_PROGRESS"
+	DONE        Todo_status = "DONE"
+	CANCELED    Todo_status = "CANCELED"
 )
 
 type TodoEntity struct {
@@ -20,7 +20,7 @@ type TodoEntity struct {
 	UserId      int
 	Title       string
 	Description string
-	Status      TodoStatus
+	Status      Todo_status
 	CreatedDate time.Time
 	DeletedDate sql.NullTime
 }

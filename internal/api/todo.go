@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"jwt-auth/internal/entity"
 	"jwt-auth/internal/middleware"
@@ -17,27 +18,21 @@ type TodoHandler struct {
 	todoService *service.TodoService
 }
 
+var ErrFobidden error
+
 func NewTodoHandler(db *sql.DB) *TodoHandler {
 	return &TodoHandler{service.NewUserService(db), service.NewTodoService(db)}
 }
 
 func (th *TodoHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
-	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
-
-	currUserEmail := ""
-	if value, ok := result["email"]; !ok {
-		util.WriteResponseWithMssg(w, http.StatusForbidden, "the user does not meet role requirements")
-		return
-	} else {
-		currUserEmail = value.(string)
-	}
-
-	res, err := th.userService.GetUserByEmail(currUserEmail)
+	res, err := th.getUserByEmailFromCTX(r)
 	if err != nil {
+		var errCustom util.ErrorCustom
+		if errors.As(err, errCustom) {
+			util.WriteResponseWithMssg(w, errCustom.Code, errCustom.Message)
+		}
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
-		return
 	}
-
 	todos, err := th.todoService.GetAllByUserId(res.UserId)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
@@ -51,10 +46,20 @@ func (th *TodoHandler) GetAllByStatus(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (th *TodoHandler) GetTodoById(w http.ResponseWriter, r *http.Request) {
-	isHavePermission := th.userService.VerifyUserFromCTX(w, r)
-	if !isHavePermission {
-		util.WriteResponseWithMssg(w, http.StatusForbidden, "the user does not meet role requirements")
+func (th *TodoHandler) GetTodoByIdAndByUser(w http.ResponseWriter, r *http.Request) {
+	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
+
+	currUserEmail := ""
+	if value, ok := result["email"]; !ok {
+		util.WriteResponseWithMssg(w, http.StatusForbidden, "incorrect token claims, please check your token")
+		return
+	} else {
+		currUserEmail = value.(string)
+	}
+
+	res, err := th.userService.GetUserByEmail(currUserEmail)
+	if err != nil {
+		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
 	}
 
@@ -75,20 +80,13 @@ func (th *TodoHandler) GetTodoById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (th *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
-	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
-
-	currUserEmail := ""
-	if value, ok := result["email"]; !ok {
-		util.WriteResponseWithMssg(w, http.StatusForbidden, "Token error")
-		return
-	} else {
-		currUserEmail = value.(string)
-	}
-
-	res, err := th.userService.GetUserByEmail(currUserEmail)
+	res, err := th.getUserByEmailFromCTX(r)
 	if err != nil {
+		var errCustom util.ErrorCustom
+		if errors.As(err, errCustom) {
+			util.WriteResponseWithMssg(w, errCustom.Code, errCustom.Message)
+		}
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
-		return
 	}
 
 	var payload *model.TodoCreateRequest
@@ -120,14 +118,14 @@ func (th *TodoHandler) UpdateTodoStatus(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var payload *model.TodoStatusRequest
-	payload, err = util.ParsePayloadWithValidator[model.TodoStatusRequest](w, r)
+	var payload *model.Todo_statusRequest
+	payload, err = util.ParsePayloadWithValidator[model.Todo_statusRequest](w, r)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	updatedRowsCount, err := th.todoService.UpdateStatus(todoIdInt, entity.TodoStatus(payload.Status))
+	updatedRowsCount, err := th.todoService.UpdateStatus(todoIdInt, entity.Todo_status(payload.Status))
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))
 		return
@@ -138,4 +136,22 @@ func (th *TodoHandler) UpdateTodoStatus(w http.ResponseWriter, r *http.Request) 
 
 func (th *TodoHandler) DeleteTodoById(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (th *TodoHandler) getUserByEmailFromCTX(r *http.Request) (model.UserResponse, error) {
+	result := r.Context().Value(middleware.ResultCtxKey).(map[string]interface{})
+
+	currUserEmail := ""
+	if value, ok := result["email"]; !ok {
+		return model.UserResponse{}, &util.ErrorCustom{Code: http.StatusForbidden, Message: "incorrect token claims, please check your token"}
+	} else {
+		currUserEmail = value.(string)
+	}
+
+	res, err := th.userService.GetUserByEmail(currUserEmail)
+	if err != nil {
+		return model.UserResponse{}, &util.ErrorCustom{Code: http.StatusForbidden, Message: fmt.Sprintf("%v", err)}
+	}
+
+	return res, nil
 }
