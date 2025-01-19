@@ -1,0 +1,21 @@
+meta {
+  name: update-todo-status
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:8080/api/users/todos/1
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMUBtYWlsLmNvbSIsImV4cCI6MTczNzI4NTM0OSwibmJmIjoxNzM3Mjg1MDQ5LCJyb2xlIjoiQURNSU4iLCJ1c2VyTmFtZSI6InRlc3QwMSJ9.wNybJkiM4BOvCeMsPrpERuxGJhxPWwXI2CoJTigyDE0
+}
+
+body:json {
+  {
+    "status": "DONE"
+  }
+}

@@ -35,12 +35,13 @@ func (uh *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
-	email := r.PathValue("email")
 	isHavePermission := uh.userService.VerifyUserFromCTX(w, r)
 	if !isHavePermission {
 		util.WriteResponseWithMssg(w, http.StatusForbidden, "the user does not meet role requirements")
 		return
 	}
+
+	email := r.PathValue("email")
 	user, err := uh.userService.GetUserByEmail(email)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusInternalServerError, fmt.Sprintf("%v", err))

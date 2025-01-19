@@ -8,10 +8,11 @@ import (
 type TodoStatus string
 
 const (
-	CREATED  TodoStatus = "CREATED"
-	PENDING  TodoStatus = "PENDING"
-	DONE     TodoStatus = "DONE"
-	CANCELED TodoStatus = "CANCELED"
+	CREATED     TodoStatus = "CREATED"
+	PENDING     TodoStatus = "PENDING"
+	IN_PROGRESS TodoStatus = "IN_PROGRESS"
+	DONE        TodoStatus = "DONE"
+	CANCELED    TodoStatus = "CANCELED"
 )
 
 type TodoEntity struct {

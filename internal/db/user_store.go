@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	insert_query      = `INSERT INTO users (username, email, password, role, created_date, deleted_date) VALUES (?, ?, ?, ?, ?, NULL);`
-	select_query      = `SELECT user_id, username, email, password, role, created_date, deleted_date FROM users`
-	update_role_query = `UPDATE users set role = ? where email = ?`
-	delete_user_query = `UPDATE users set deleted_date = ? where email = ?`
+	insert_user_query      = `INSERT INTO users (username, email, password, role, created_date, deleted_date) VALUES (?, ?, ?, ?, ?, NULL);`
+	select_user_query      = `SELECT user_id, username, email, password, role, created_date, deleted_date FROM users`
+	update_user_role_query = `UPDATE users SET role = ? WHERE email = ?;`
+	delete_user_query      = `UPDATE users SET deleted_date = ? WHERE email = ?;`
 )
 
 type UserStore struct {
@@ -24,7 +24,7 @@ func NewUserStore(db *sql.DB) *UserStore {
 }
 
 func (as *UserStore) CreateUser(user entity.UserEntity) (int, error) {
-	res, err := as.db.Exec(insert_query, user.Username, user.Email, user.Password, user.Role, user.CreatedDate)
+	res, err := as.db.Exec(insert_user_query, user.Username, user.Email, user.Password, user.Role, user.CreatedDate)
 	if err != nil {
 		log.Printf("%v", err)
 		return 0, err
@@ -39,7 +39,7 @@ func (as *UserStore) CreateUser(user entity.UserEntity) (int, error) {
 }
 
 func (as *UserStore) GetUserByEmail(email string) (entity.UserEntity, error) {
-	select_by_email_query := fmt.Sprintf("%s %s", select_query, "WHERE email = ? AND deleted_date IS NULL;")
+	select_by_email_query := fmt.Sprintf("%s %s", select_user_query, "WHERE email = ? AND deleted_date IS NULL;")
 	row := as.db.QueryRow(select_by_email_query, email)
 	var user entity.UserEntity
 	err := row.Scan(&user.UserId, &user.Username, &user.Email, &user.Password, &user.Role, &user.CreatedDate, &user.DeletedDate)
@@ -52,7 +52,7 @@ func (as *UserStore) GetUserByEmail(email string) (entity.UserEntity, error) {
 
 func (as *UserStore) GetUsers() ([]entity.UserEntity, error) {
 	result := make([]entity.UserEntity, 0)
-	rows, err := as.db.Query(fmt.Sprintf("%s %s", select_query, "WHERE deleted_date IS NULL;"))
+	rows, err := as.db.Query(fmt.Sprintf("%s %s", select_user_query, "WHERE deleted_date IS NULL;"))
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (as *UserStore) GetUsers() ([]entity.UserEntity, error) {
 }
 
 func (as *UserStore) ChangeUsersRole(role, email string) (int, error) {
-	res, err := as.db.Exec(update_role_query, role, email)
+	res, err := as.db.Exec(update_user_role_query, role, email)
 	if err != nil {
 		return 0, err
 	}
