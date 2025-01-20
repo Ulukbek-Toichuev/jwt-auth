@@ -9,15 +9,18 @@ import (
 	"jwt-auth/internal/service"
 	"jwt-auth/internal/util"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type UserHandler struct {
 	userService service.UserService
+	validate    *validator.Validate
 }
 
-func NewUserHandler(db *sql.DB) *UserHandler {
+func NewUserHandler(db *sql.DB, v *validator.Validate) *UserHandler {
 	us := service.NewUserService(db)
-	return &UserHandler{*us}
+	return &UserHandler{*us, v}
 }
 
 // Хендлер для получения списка всех пользователей
@@ -91,7 +94,7 @@ func (uh *UserHandler) ChangeUsersRole(w http.ResponseWriter, r *http.Request) {
 
 	var payload *model.UserChangeRoleRequest
 
-	payload, err := util.ParsePayloadWithValidator[model.UserChangeRoleRequest](w, r)
+	payload, err := util.ParsePayloadWithValidator[model.UserChangeRoleRequest](w, r, uh.validate)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
@@ -118,7 +121,7 @@ func (uh *UserHandler) DeleteUserByEmail(w http.ResponseWriter, r *http.Request)
 
 	var payload *model.UserDeleteRequest
 
-	payload, err := util.ParsePayloadWithValidator[model.UserDeleteRequest](w, r)
+	payload, err := util.ParsePayloadWithValidator[model.UserDeleteRequest](w, r, uh.validate)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return

@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:8080
+  url: http://localhost:8080/api/users/todos/1
   body: none
   auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QwMUBtYWlsLmNvbSIsImV4cCI6MTczNzI4NTE2NiwibmJmIjoxNzM3Mjg0ODY2LCJyb2xlIjoiQURNSU4iLCJ1c2VyTmFtZSI6InRlc3QwMSJ9.i1yYUwaX1pu5r9J0woqjCrK_lHj3OpM2xl8qzQlxKDQ
 }

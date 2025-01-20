@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,14 +18,16 @@ type AuthHandler struct {
 	userService service.UserService
 	secretKey   string
 	tokenExpiry time.Duration
+	validate    *validator.Validate
 }
 
-func NewAuthHandler(db *sql.DB, cg *config.Config) *AuthHandler {
+func NewAuthHandler(db *sql.DB, cg *config.Config, v *validator.Validate) *AuthHandler {
 	as := service.NewUserService(db)
 	return &AuthHandler{
 		userService: *as,
 		secretKey:   cg.GetSecretKey(),
 		tokenExpiry: time.Duration(cg.GetTokenExpiry()) * time.Minute,
+		validate:    v,
 	}
 }
 
@@ -33,7 +36,7 @@ func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	var payload *model.UserSignInRequest
 
 	//Валидируем тело запроса
-	payload, err := util.ParsePayloadWithValidator[model.UserSignInRequest](w, r)
+	payload, err := util.ParsePayloadWithValidator[model.UserSignInRequest](w, r, ah.validate)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
@@ -68,7 +71,7 @@ func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var payload *model.UserSignUpRequest
 
 	//Валидируем тело запроса
-	payload, err := util.ParsePayloadWithValidator[model.UserSignUpRequest](w, r)
+	payload, err := util.ParsePayloadWithValidator[model.UserSignUpRequest](w, r, ah.validate)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return

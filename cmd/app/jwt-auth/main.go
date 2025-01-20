@@ -6,12 +6,15 @@ import (
 	"jwt-auth/config"
 	"jwt-auth/internal/api"
 	"jwt-auth/internal/db"
+	"jwt-auth/internal/util"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func main() {
@@ -19,9 +22,12 @@ func main() {
 
 	db := db.NewDB(config.GetDriverName(), config.GetDataSource(), config.GetMigrationsPath())
 
-	authHandler := api.NewAuthHandler(db, config)
-	userHandler := api.NewUserHandler(db)
-	todoHandler := api.NewTodoHandler(db)
+	validate := validator.New()
+	validate.RegisterValidation("check_status", util.ValidateTodoStatus)
+
+	authHandler := api.NewAuthHandler(db, config, validate)
+	userHandler := api.NewUserHandler(db, validate)
+	todoHandler := api.NewTodoHandler(db, validate)
 
 	mux := http.NewServeMux()
 

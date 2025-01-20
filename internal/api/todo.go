@@ -11,17 +11,20 @@ import (
 	"jwt-auth/internal/util"
 	"net/http"
 	"strconv"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type TodoHandler struct {
 	userService *service.UserService
 	todoService *service.TodoService
+	validate    *validator.Validate
 }
 
 var ErrFobidden error
 
-func NewTodoHandler(db *sql.DB) *TodoHandler {
-	return &TodoHandler{service.NewUserService(db), service.NewTodoService(db)}
+func NewTodoHandler(db *sql.DB, v *validator.Validate) *TodoHandler {
+	return &TodoHandler{service.NewUserService(db), service.NewTodoService(db), v}
 }
 
 func (th *TodoHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +93,7 @@ func (th *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload *model.TodoCreateRequest
-	payload, err = util.ParsePayloadWithValidator[model.TodoCreateRequest](w, r)
+	payload, err = util.ParsePayloadWithValidator[model.TodoCreateRequest](w, r, th.validate)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
@@ -123,7 +126,7 @@ func (th *TodoHandler) UpdateTodoStatus(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var payload *model.Todo_statusRequest
-	payload, err = util.ParsePayloadWithValidator[model.Todo_statusRequest](w, r)
+	payload, err = util.ParsePayloadWithValidator[model.Todo_statusRequest](w, r, th.validate)
 	if err != nil {
 		util.WriteResponseWithMssg(w, http.StatusBadRequest, err.Error())
 		return
